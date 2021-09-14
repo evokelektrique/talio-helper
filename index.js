@@ -9,6 +9,7 @@ import { Utils } from "./utils"
 window.onload = async () => {
 
    const util_config = {
+      jwt: null,
       api_version: 1,
       website_id: 2,
       snapshot_id: 1,
@@ -19,34 +20,25 @@ window.onload = async () => {
          container: "talio_heatmap_container"
       },
       screenshot: {
-         key: "1_1251938081_1"
+         key: null
       }
    }
 
+   // Add JWT to util config object
    util_config.jwt = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ0YWxpbyIsImV4cCI6MTYzMzc4NzgwMiwiaWF0IjoxNjMxMTk1ODAyLCJpc3MiOiJ0YWxpbyIsImp0aSI6IjEzOTE3ZmYxLTlhYzYtNDEwYS1iYjAzLWZlMjAwYjA0ZjBmMyIsIm5iZiI6MTYzMTE5NTgwMSwic3ViIjoiMiIsInR5cCI6ImFjY2VzcyJ9.UfRRrN2ENK4zj59lXCXubVL_5lcxx03rUJN7x_iiJwWNl444tFqsJORFCi_Ghq6JcdGt_O3Ig27HpnDChj2QOA"
+   // Add Screenshot S3 Key
+   util_config.screenshot.key = "1_1251938081_1"
 
+   // MAGIC !
    const utils = new Utils(util_config)
 
-
-   // Append background image to target canvas
-   const background_canvas = await utils.draw_background_image(document.getElementById("heatmap_background"), 0.5)
-   console.log(background_canvas)
-
-   // Current branch ID
-   const branch_id = 96
-   // Select device form 0 to 2
-   const device = 1
    // Draw elements and get clicks
-   const clicks = await utils.fetch_elements(branch_id, device)
-
-   // TOOD: Log
-   console.log(clicks)
+   const clicks = await utils.fetch_elements()
 
    // Heatmap Configuration
    const config = {
       brush_size: 10,
       brush_blur_size: 10,
-      device: device,
       gradient: {
          0.4: 'blue',
          0.6: 'cyan',
@@ -57,9 +49,10 @@ window.onload = async () => {
    }
 
    // Initialzie Heatmap Class
+   const heatmap_element = "heatmap" // Heatmap HTML Element ID
    const heatmap = new Heatmap(
       config,
-      "heatmap", // Heatmap HTML Element ID
+      heatmap_element,
       background_canvas.width,
       background_canvas.height
    );
@@ -67,14 +60,9 @@ window.onload = async () => {
    // Insert Data
    const data = []
    clicks.forEach(click => {
+      // Arguments: [X, Y, AlphaOpacity]
       data.push([click.x, click.y, 0.8]);
    })
-
-   // data.push([539., 70, 0.8])
-
-   // for (var i = 0; i < 100; i++) {
-   //   data.push([Math.floor(Math.random() * 300), Math.floor(Math.random() * 1000), 0.8]);
-   // }
 
    // Set Data
    heatmap.data = data
@@ -87,5 +75,5 @@ window.onload = async () => {
 
    // Display Heatmap
    heatmap.draw()
-}
 
+}
