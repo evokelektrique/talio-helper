@@ -1,4 +1,6 @@
 {
+    "/dist/heatmap.js": "/dist/heatmap.js",
+    "/dist/utils.js": "/dist/utils.js",
     "/dist/index.js": "/dist/index.js",
     "/talio_static/helper.js": "/talio_static/helper.js"
 }

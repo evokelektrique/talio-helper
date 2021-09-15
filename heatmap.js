@@ -1,42 +1,27 @@
-
+import { UnsupportedBrowserError } from "./errors"
 
 // 
 // Core Class
 // 
 class Heatmap {
-  devices = {
-    // desktop
-    0: {  
-      width: 1280,
-      height: 640,
-    },
-    // tablet
-    1: {  
-      width: 800,
-      height: 640,
-      isMobile: true,
-    },
-    // mobile
-    2: {  
-      width: 380,
-      height: 640,
-      isMobile: true,
-    }
-  }
 
+  // Configuration
   config = {}
 
   // Current Canvas
   canvas = null
+
   // Canvas Context2d
   ctx    = null
 
+  // Elements and its clicks
   data = []
 
+  // Minimum opacity
   max = 1
+
+  // Maximum Opacity
   min = 0.1
-
-
 
   // 1: Config Object
   // 2: canvas_id(Provide a HTML ID which it will create a canvas inside it)
@@ -53,8 +38,6 @@ class Heatmap {
     this.canvas = document.getElementById(canvas_id)
     this.canvas.width = width
     this.canvas.height = height
-    // this.canvas.width = this.devices[0].width
-    // this.canvas.height = this.devices[0].height
 
     // Validate Browser Support
     try {
@@ -87,18 +70,6 @@ class Heatmap {
     this.background_image_url = url
   }
 
-  // draw_background_image(canvas, background_image_url, opacity) {
-  //   const image = new Image();
-  //   image.src = background_image_url;
-  //   image.onload = () => {
-  //     const ctx = canvas.getContext("2d")
-  //     canvas.width = image.width
-  //     canvas.height = image.height
-  //     ctx.globalAlpha = opacity || 0.4;
-  //     ctx.drawImage(image, 0, 0, image.width, image.height);
-  //   }
-  // }
-
   draw() {
 
     if (!this._grad) {
@@ -108,13 +79,10 @@ class Heatmap {
       this.radius(this.config.brush_size, this.config.brush_blur_size);
     }
 
-    // Dispaly Background Image With Opacity
-    // this.draw_background_image(0.4)
-
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // draw a grayscale heatmap by putting a blurred circle at each data point
-    for (var i = 0, len = this.data.length, p; i < len; i++) {
+    for(var i = 0, len = this.data.length, p; i < len; i++) {
         p = this.data[i];
 
         this.ctx.globalAlpha = Math.max(p[2] / this.max, this.min === undefined ? 0.05 : this.min);
@@ -163,25 +131,25 @@ class Heatmap {
 
   // Generate Gradient Canvas
   gradient(grad) {
-    // create a 256x1 gradient that we'll use to turn a grayscale heatmap into a colored one
-     var canvas = document.createElement('canvas'),
-         ctx = canvas.getContext('2d'),
-         gradient = ctx.createLinearGradient(0, 0, 0, 256);
+      // create a 256x1 gradient that we'll use to turn a grayscale heatmap into a colored one
+      var canvas = document.createElement('canvas'),
+      ctx = canvas.getContext('2d'),
+      gradient = ctx.createLinearGradient(0, 0, 0, 256);
 
-     canvas.width = 1;
-     canvas.height = 256;
+      canvas.width = 1;
+      canvas.height = 256;
 
-     for (var i in grad) {
-         gradient.addColorStop(i, grad[i]);
-     }
+      grad.forEach((g) => {
+         gradient.addColorStop(g.stop, g.color);
+      })
 
-     ctx.fillStyle = gradient;
-     ctx.fillRect(0, 0, 1, 256);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1, 256);
 
-     this._grad = ctx.getImageData(0, 0, 1, 256).data;
+      this._grad = ctx.getImageData(0, 0, 1, 256).data;
 
-     return this;
-  }
+      return this;
+   }
 
 }
 
